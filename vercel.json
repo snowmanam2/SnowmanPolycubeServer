@@ -1,0 +1,4 @@
+{
+ "builds": [{ "src": "polycube_server.py", "use": "@vercel/python" }],
+ "routes": [{ "src": "/(.*)", "dest": "polycube_server.py" }]
+}
