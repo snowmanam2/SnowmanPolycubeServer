@@ -1,4 +1,11 @@
 {
+  "devCommand": "uvicorn polycube_server:app --host 0.0.0.0 --port 3000",
+  "builds": [
+    {
+      "src": "/polycube_server.py",
+      "use": "@vercel/python"
+    }
+  ],
   "rewrites": [
      {"source": "/(.*)", "destination": "/polycube_server"}
   ]
