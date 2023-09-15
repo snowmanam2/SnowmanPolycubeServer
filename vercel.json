@@ -1,4 +1,0 @@
-{
- "builds": [{ "src": "polycube_server.py", "use": "@vercel/python" }],
- "rewrites": [{ "source": "/(.*)", "destination": "polycube_server" }]
-}
