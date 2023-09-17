@@ -179,7 +179,7 @@ async def submit_ticket(j: str, sub: submission_schema, request: Request, db: Se
 	if elapsed < 10:
 		raise HTTPException(status_code=400, detail="Ticket returned too quickly")
 		
-	if (elapsed + 3) < results.secondselapsed:
+	if (elapsed + 3) < sub.secondselapsed:
 		raise HTTPException(status_code=400, detail="Invalid compute duration received")
 		
 	if sub.seedindex != ticket_db.seedindex:
