@@ -30,6 +30,7 @@ class submission_schema(BaseModel):
 	ticketid: int
 	token: str
 	contributor: str
+	seedindex: int
 	secondselapsed: int
 	results: List[result_schema] = []
 

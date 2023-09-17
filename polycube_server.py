@@ -168,6 +168,22 @@ async def submit_ticket(j: str, sub: submission_schema, request: Request, db: Se
 	if duplicates_q.all():
 		status = 1
 	
+	if len(sub.results) != (job_db.targetlength - job_db.seedlength):
+		raise HTTPException(status_code=400, detail="Incorrect result count")
+		
+	if sub.results[0].resultvalue == 0:
+		raise HTTPException(status_code=400, detail="Empty result")
+	
+	elapsed = time.time() - ticket_db.issuedate
+	
+	if elapsed < 10:
+		raise HTTPException(status_code=400, detail="Ticket returned too quickly")
+		
+	if (elapsed + 3) < results.secondselapsed:
+		raise HTTPException(status_code=400, detail="Invalid compute duration received")
+		
+	if sub.seedindex != ticket_db.seedindex:
+		raise HTTPException(status_code=400, detail="Incorrect seedindex")
 	
 	new_submission = Submission(
 		job = j,
@@ -195,7 +211,6 @@ async def submit_ticket(j: str, sub: submission_schema, request: Request, db: Se
 	db.add_all(results)
 	db.commit()
 	
-	
 	return None
 
 # Restricted: View raw job submission data
@@ -219,6 +234,49 @@ async def get_submission(j: str, s: int, db: Session = Depends(create_get_sessio
 		raise HTTPException(status_code=404, detail="Submission does not exist")
 	
 	return submission_db
+
+# Restricted: Add submission directly bypassing ticket system
+@app.post("/jobs/{j}/submission", response_model = submission_schema_db, status_code=201)
+async def add_submission(j: str, sub: submission_schema, request: Request, db: Session = Depends(create_get_session), api_key: str = Security(get_api_key)):
+	job_db = db.query(Job).get(j)
+	if not job_db:
+		raise HTTPException(status_code=404, detail="Job does not exist")
+		
+	status = 0
+	duplicates_q = db.query(Submission).where(
+		Submission.seedindex == sub.seedindex, 
+		Submission.status == 0, 
+		Submission.job == j)
+	if duplicates_q.all():
+		status = 1
+	
+	new_submission = Submission(
+		job = j,
+		seedindex = sub.seedindex,
+		contributor = sub.contributor,
+		secondselapsed = sub.secondselapsed,
+		ip = request.client.host,
+		receivedate = int(time.time()),
+		status = status
+	)
+	
+	db.add(new_submission)
+	db.commit()
+	db.refresh(new_submission)
+	
+	results = [
+		Result(
+			submissionid = new_submission.submissionid, 
+			resultlength = r.resultlength, 
+			resultvalue = r.resultvalue
+		) for r in sub.results]
+	
+	db.add_all(results)
+	db.commit()
+	
+	return new_submission
+	
+	
 	
 # Restricted: Update submission data
 @app.patch("/jobs/{j}/submissions/{s}", response_model = submission_schema_db, status_code=200)
