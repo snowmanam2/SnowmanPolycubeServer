@@ -80,7 +80,7 @@ async def update_job(job: str, j: job_schema, db: Session = Depends(create_get_s
 	job_db.seedchunk = j.seedchunk
 	job_db.seedlength = j.seedlength
 	job_db.targetlength = j.targetlength
-	job_db.tickettimout = j.tickettimeout
+	job_db.tickettimeout = j.tickettimeout
 	
 	db.commit()
 	db.refresh(job_db)
