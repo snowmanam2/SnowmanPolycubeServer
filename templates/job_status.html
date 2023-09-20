@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>{{ job }} Job Status</title>
+<style>
+.p2 {
+  font-family: Open Sans, sans-serif;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.p3 {
+  font-family: Open Sans, sans-serif;
+  font-size: 18px;
+  color:Gray;
+}
+
+.p4 {
+  font-family: "Lucida Console", "Courier New", monospace;
+}
+
+.p4b {
+  font-family: "Lucida Console", "Courier New", monospace;
+  font-weight: bold;
+}
+
+.p4bi {
+  font-family: "Lucida Console", "Courier New", monospace;
+  font-weight: bold;
+  font-style: italic;
+  color: Gray;
+}
+
+.b {
+  color:Black;
+}
+
+.ol1 {
+  font-family: Open Sans, sans-serif;
+  font-size: 16px;
+}
+
+.codeDiv {
+  background-color: #F1F1F1;
+  display:inline-block;
+}
+</style>
+</head>
+<body>
+<p class="p2">Status of Job "{{ job }}" to generate N={{ targetlength}}:</p>
+<p class="p3" id="statusdata">
+<span class="b">{{ percent }}%</span> generated<br>
+<span class="b">{{ resultcount }} / {{ jobcount }}</span> segments processed<br>
+<span class="b">{{ seconds }}</span> compute seconds used<br>
+<span class="b">{{ value }}</span> polycubes found<br>
+</p>
+<br>
+<p class="p2">How to Contribute:</p>
+<ol class="ol1">
+  <li>Clone <a href="https://github.com/snowmanam2/SnowmanPolycubeGenerator">SnowmanPolycubeGenerator</a>
+  and build the executable.</li><br>
+  <li>Create a <span class="p4b">job_processor.cfg</span> file in the same directory as the <span class="p4b">job_processor.py</span> file. <br>
+  Add the following information:<br><br>
+  <div class="codeDiv"><span class="p4">
+[Job]<br>
+job_server = <span class="p4b">{{ base_url }}jobs/{{ job }}/job-tickets</span><br>
+job_folder = jobs<br><br>
+
+[General]<br>
+threads = <span class="p4bi">&lt;Your Processor Thread Count&gt;</span><br>
+cmd = ./polycube_generator<br>
+contributor_name = <span class="p4bi">&lt;Your Contributor Name&gt;</span></span></div></li>
+
+<br>
+  <li>Run the <span class="p4b">job_processor.py</span> with python.</li>
+</ol> 
+
+</body>
+</html>

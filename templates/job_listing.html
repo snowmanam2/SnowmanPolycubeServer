@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Polycube Job Server</title>
+<style>
+.p1 {
+  font-family: Open Sans, sans-serif;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.p2 {
+  font-family: Open Sans, sans-serif;
+  font-size: 18px;
+  color:Black;
+}
+</style>
+</head>
+<body>
+<p class="p1">Polycube Jobs on this Server:</p>
+<ul class="p2">
+{% for item in jobs %}
+  <li><a href="{{ base_url }}jobs/{{ item.job }}/summary">{{ item.job }} for N={{ item.targetlength }}</a></li>
+{% endfor %}
+</ul>
+
+</body>
+</html>

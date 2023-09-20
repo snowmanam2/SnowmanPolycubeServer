@@ -1,4 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException, Request, Security
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from fastapi.security import APIKeyHeader, APIKeyQuery
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -26,6 +29,15 @@ def get_api_key(
 		raise HTTPException(status_code=401, detail="Invalid or missing API key")
 
 app = FastAPI()
+
+templates = Jinja2Templates(directory="templates")
+
+# Public: Root
+@app.get("/", response_class=HTMLResponse)
+async def get_root(request: Request, db: Session = Depends(create_get_session)):
+	jobs = db.query(Job).all()
+	
+	return templates.TemplateResponse("job_listing.html", {"request": request, "base_url": request.base_url, "jobs": jobs})
 
 # Public: Job Listing
 @app.get("/jobs", response_model=List[job_schema_db], status_code=200)
@@ -324,8 +336,8 @@ async def get_results(j: str, l: int, db: Session = Depends(create_get_session),
 	return {'seedindices':seedindices, 'values':values}
 
 # Public: Job summary
-@app.get("/jobs/{j}/summary", response_model = summary_schema, status_code=200)
-async def get_summary(j: str, db: Session = Depends(create_get_session)):
+@app.get("/jobs/{j}/summary", response_class=HTMLResponse)
+async def get_summary(j: str, request: Request, db: Session = Depends(create_get_session)):
 	job_db = db.query(Job).get(j)
 	if not job_db:
 		raise HTTPException(status_code=404, detail="Job does not exist")
@@ -344,6 +356,11 @@ async def get_summary(j: str, db: Session = Depends(create_get_session)):
 		INNER JOIN jobs
 		ON jobs.job = sub.job
 		AND rs.resultlength = jobs.targetlength'''), {'j': j}).fetchone()
-		
-	return {'value': result.value, 'seconds': result.seconds, 'resultcount': result.resultcount, 'jobcount': result.jobcount, 'targetlength': job_db.targetlength}
+	
+	return templates.TemplateResponse("job_status.html", 
+		{"value": result.value, "seconds": result.seconds, "resultcount": result.resultcount, "jobcount": result.jobcount, 
+		"targetlength": job_db.targetlength, "job": j,
+		"percent": "{0:.1f}".format(int(result.resultcount) * 100. / int(result.jobcount)),
+		"base_url": request.base_url, "request": request
+		})
 	
